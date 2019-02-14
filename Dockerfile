@@ -1,6 +1,6 @@
 FROM alpine:3.8
 
-MAINTAINER Mingda Jin <mjin@zymoresearch.com>
+MAINTAINER Mingda Jin
 
 ENV VERSION 0.3.0
 

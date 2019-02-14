@@ -5,9 +5,6 @@ language: python
 services:
   - docker
 
-install:
-  - pip install awscli
-
 script:
   - docker --version
   - docker build -t methyldackel .
@@ -16,6 +13,7 @@ after_success:
   - docker images
 
 before_deploy:
+  - pip install awscli
   - version="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"  # Fetch VERSION from Dockerfile
   - eval $(aws ecr get-login --no-include-email --region us-east-1)  # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
   - docker tag methyldackel:latest 002226384833.dkr.ecr.us-east-1.amazonaws.com/methyldackel:latest
