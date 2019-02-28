@@ -39,3 +39,6 @@ deploy:
   script: docker push $ECR/$IMAGE:$VERSION_CONTAINER && docker push $ECR/$IMAGE:latest && dx build dnanexus/$IMAGE --archive
   on:
     branch: master
+
+after_deploy:
+  - echo "test applet remotely"
