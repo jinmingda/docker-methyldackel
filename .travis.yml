@@ -1,25 +1,40 @@
 sudo: required
 
+dist: xenial
+
 language: python
 
 services:
   - docker
 
+env:
+  global:
+    - ECR=002226384833.dkr.ecr.us-east-1.amazonaws.com
+    - IMAGE=methyldackel
+
+install:
+  - echo "install dependencies for testing"
+
 script:
-  - docker --version
-  - docker build -t methyldackel .
+  - echo "run test suite if there is any"
+  - docker build -t $IMAGE .
+  - docker run --rm $IMAGE
 
 after_success:
   - docker images
 
 before_deploy:
-  - pip install awscli
-  - version="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"  # Fetch VERSION from Dockerfile
-  - eval $(aws ecr get-login --no-include-email --region us-east-1)  # AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY envvars
-  - docker tag methyldackel:latest 002226384833.dkr.ecr.us-east-1.amazonaws.com/methyldackel:${version}
+  - pip install awscli dxpy
+  - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
+  - eval $(aws ecr get-login --no-include-email --region us-east-1)  # AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+  - docker tag $IMAGE:latest $ECR/$IMAGE:$VERSION_CONTAINER
+  - docker tag $IMAGE:latest $ECR/$IMAGE:latest
+  - dx login --token $DX_TOKEN --noprojects --save  # secret envvar
+  - dx select $DX_PROJECT  # secret envvar
+  - dx mkdir -p $IMAGE/$VERSION_CONTAINER  # or version_applet?
 
 deploy:
   provider: script
-  script: docker push 002226384833.dkr.ecr.us-east-1.amazonaws.com/methyldackel:latest && docker push 002226384833.dkr.ecr.us-east-1.amazonaws.com/methyldackel:${version}
+  script: docker push $ECR/$IMAGE:$VERSION_CONTAINER && docker push $ECR/$IMAGE:latest
   on:
     branch: master
