@@ -2,7 +2,7 @@ FROM alpine:3.8
 
 MAINTAINER Mingda Jin <mjin@zymoresearch.com>
 
-ENV VERSION 0.3.1
+ENV VERSION 0.3.0
 
 RUN apk --no-cache add --virtual deps \
       alpine-sdk \
