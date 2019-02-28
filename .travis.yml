@@ -32,9 +32,10 @@ before_deploy:
   - dx login --token $DX_TOKEN --noprojects --save  # secret envvar
   - dx select $DX_PROJECT  # secret envvar
   - dx mkdir -p $IMAGE/$VERSION_CONTAINER  # or version_applet?
+  - dx cd $IMAGE/$VERSION_CONTAINER
 
 deploy:
   provider: script
-  script: docker push $ECR/$IMAGE:$VERSION_CONTAINER && docker push $ECR/$IMAGE:latest
+  script: docker push $ECR/$IMAGE:$VERSION_CONTAINER && docker push $ECR/$IMAGE:latest && dx build dnanexus/$IMAGE --archive
   on:
     branch: master

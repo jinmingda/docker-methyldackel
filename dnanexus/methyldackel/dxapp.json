@@ -1,0 +1,75 @@
+{
+  "name": "methyldackel",
+  "title": "MethylDackel",
+  "summary": "MethylDackel will process a coordinate-sorted and indexed BAM or CRAM file containing some form of BS-seq alignments and extract per-base methylation metrics from them. MethylDackel requires an indexed fasta file containing the reference genome as well.",
+  "tags": ["BS-Seq"],
+  "dxapi": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "bamfile_link",
+      "label": "BAM",
+      "help": "Sorted alignments in BAM format.",
+      "class": "file",
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "ref_genome_link",
+      "label": "Reference genome",
+      "help": "Reference genome in gzipped FASTA format.",
+      "class": "file",
+      "patterns": ["*.fa.gz", "*.fasta.gz", "*.fa", "*.fasta"]
+    },
+    {
+      "name": "ref_index_link",
+      "label": "Reference index",
+      "help": "(Optional) Reference index file.",
+      "class": "file",
+      "patterns": ["*.fai"],
+      "optional": true
+    },
+    {
+      "name": "regionfile_link",
+      "label": "Regions for inclusion",
+      "help": "(Optional) A BED file listing regions for inclusion.",
+      "class": "file",
+      "patterns": ["*.bed"],
+      "optional": true
+    },
+    {
+      "name": "extra_options",
+      "label": "Extra command line options",
+      "help": "Extra command line options that will be supplied directly to the methyldackel command.",
+      "class": "string",
+      "optional": true,
+      "group": "Advanced"
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "bedfile_link",
+      "label": "Methylation metrics",
+      "help": "Per-base methylation metrics in BED format.",
+      "class": "file",
+      "patterns": ["*.bedGraph"]
+    }
+  ],
+  "runSpec": {
+    "file": "src/script.sh",
+    "interpreter": "bash",
+    "distribution": "Ubuntu",
+    "release": "16.04"
+  },
+  "access": {
+    "project": "CONTRIBUTE",
+    "network": ["*"]
+  },
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
+        "main": {
+          "instanceType": "mem1_ssd1_x2"
+        }
+      }
+    }
+  }
+}
