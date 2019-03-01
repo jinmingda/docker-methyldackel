@@ -28,28 +28,14 @@ script:
 after_success:
   - docker images
 
-before_deploy:
-  - pip install awscli
-  - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
-  - eval $(aws ecr get-login --no-include-email --region us-east-1)  # AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-  - docker tag $IMAGE:latest $ECR/$IMAGE:$VERSION_CONTAINER
-  - docker tag $IMAGE:latest $ECR/$IMAGE:latest
-  - dx mkdir -p $IMAGE/$VERSION_CONTAINER
-  - dx cd $IMAGE/$VERSION_CONTAINER
-
+# Can't configure before/after/deploy sections per provider
 deploy:
-  provider: script
-  script: docker push $ECR/$IMAGE:$VERSION_CONTAINER && docker push $ECR/$IMAGE:latest && dx build dnanexus/$IMAGE --archive
-  on:
-    branch: master
-
-after_deploy:
-  - dx upload dnanexus/$IMAGE/test/ -r -p --no-progress --brief --destination ./test/
-  - |
-    dx run ./$IMAGE --verbose -y --wait --watch --destination ./test/ \
-        -ibamfile_link=./test/sample.bam \
-        -iref_genome_link=./test/reference.fa.gz \
-        -iaws_access_key_id=$AWS_ACCESS_KEY_ID \
-        -iaws_secret_access_key=$AWS_SECRET_ACCESS_KEY
-  - dx rm -r test  # dx run input is configurable and return 0 regardless of job result
+  - provider: script
+    script: bash scripts/deploy_docker.sh
+    on:
+      branch: master
+  - provider: script
+    script: bash scripts/deploy_dnanexus.sh
+    on:
+      tags: true
 
