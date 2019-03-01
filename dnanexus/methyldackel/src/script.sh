@@ -5,14 +5,8 @@ main() {
   # set -x to print trace
   set -e -x
 
-  # install awscli from local (only works on ubuntu 16.04)
-  python3 /tmp/awscli-bundle/install -b ~/bin/aws
-  # test awscli
-  aws --version
   # login to pull images from ECR
-  export AWS_ACCESS_KEY_ID="$aws_access_key_id"
-  export AWS_SECRET_ACCESS_KEY="$aws_secret_access_key"
-  eval $(aws ecr get-login --no-include-email --region us-east-1)
+  eval $(docker run --rm -e AWS_ACCESS_KEY_ID="$aws_access_key_id" -e AWS_SECRET_ACCESS_KEY="$aws_secret_access_key" mesosphere/aws-cli ecr get-login --no-include-email --region us-east-1)
 
   opts=""
 
