@@ -38,7 +38,8 @@ deploy:
   - provider: script
     script: bash scripts/deploy_docker.sh
     on:
-      branch: master
+      tags: true
+      #branch: master
   - provider: script
     script: bash scripts/deploy_dnanexus.sh
     on:
