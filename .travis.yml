@@ -10,28 +10,31 @@ services:
 env:
   global:
     - ECR=002226384833.dkr.ecr.us-east-1.amazonaws.com
-    - IMAGE=methyldackel
+    - IMAGE=methyldackel  # configurable, must also be the same as the applet name
 
 install:
-  - echo "install dependencies for testing"
+  - pip install dxpy
+
+before_script:
+  - dx login --token $DX_TOKEN --noprojects --save
+  - dx select $DX_PROJECT
 
 script:
   - echo "run test suite if there is any"
   - docker build -t $IMAGE .
   - docker run --rm $IMAGE
+  - dx build dnanexus/$IMAGE --overwrite --dry-run
 
 after_success:
   - docker images
 
 before_deploy:
-  - pip install awscli dxpy
+  - pip install awscli
   - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
   - eval $(aws ecr get-login --no-include-email --region us-east-1)  # AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
   - docker tag $IMAGE:latest $ECR/$IMAGE:$VERSION_CONTAINER
   - docker tag $IMAGE:latest $ECR/$IMAGE:latest
-  - dx login --token $DX_TOKEN --noprojects --save  # secret envvar
-  - dx select $DX_PROJECT  # secret envvar
-  - dx mkdir -p $IMAGE/$VERSION_CONTAINER  # or version_applet?
+  - dx mkdir -p $IMAGE/$VERSION_CONTAINER
   - dx cd $IMAGE/$VERSION_CONTAINER
 
 deploy:
@@ -41,4 +44,6 @@ deploy:
     branch: master
 
 after_deploy:
-  - echo "test applet remotely"
+  - dx upload dnanexus/$IMAGE/test/ -r -p --no-progress --brief --destination ./test/
+  - dx run ./methyldackel --verbose -y --wait --watch --destination ./test/ -ibamfile_link=test/sample.bam -iref_genome_link=test/reference.fa.gz -iaws_access_key_id=AWS_ACCESS_KEY_ID -iaws_secret_access_key=$AWS_SECRET_ACCESS_KEY ; docker rm -r test
+
