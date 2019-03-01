@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e -x
 
-VERSION_APPLET="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
-echo $TRAVIS_TAG
+#VERSION_APPLET="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
+VERSION_APPLET=$TRAVIS_TAG
 dx mkdir -p $IMAGE/$VERSION_APPLET
 dx cd $IMAGE/$VERSION_APPLET
 
