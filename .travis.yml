@@ -45,6 +45,11 @@ deploy:
 
 after_deploy:
   - dx upload dnanexus/$IMAGE/test/ -r -p --no-progress --brief --destination ./test/
-  - dx run ./methyldackel --verbose -y --wait --watch --destination ./test/ -ibamfile_link=./test/sample.bam -iref_genome_link=./test/reference.fa.gz -iaws_access_key_id=$AWS_ACCESS_KEY_ID -iaws_secret_access_key=$AWS_SECRET_ACCESS_KEY
-  - dx rm -r test
+  - |
+    dx run ./methyldackel --verbose -y --wait --watch --destination ./test/ \
+        -ibamfile_link=./test/sample.bam \
+        -iref_genome_link=./test/reference.fa.gz \
+        -iaws_access_key_id=$AWS_ACCESS_KEY_ID \
+        -iaws_secret_access_key=$AWS_SECRET_ACCESS_KEY
+  - dx rm -r test  # dx run is configurable and return 0 regardless of job result
 
