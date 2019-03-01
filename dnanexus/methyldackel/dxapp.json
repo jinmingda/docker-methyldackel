@@ -42,6 +42,20 @@
       "class": "string",
       "optional": true,
       "group": "Advanced"
+    },
+    {
+      "name": "aws_access_key_id",
+      "label": "AWS_ACCESS_KEY_ID",
+      "help": "AWS API crendential that will be set as environment variable.",
+      "class": "string",
+      "group": "AWS Credential"
+    },
+    {
+      "name": "aws_secret_access_key",
+      "label": "AWS_SECRET_ACCESS_KEY",
+      "help": "AWS API crendential that will be set as environment variable.",
+      "class": "string",
+      "group": "AWS Credential"
     }
   ],
   "outputSpec": [
