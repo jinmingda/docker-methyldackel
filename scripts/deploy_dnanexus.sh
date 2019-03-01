@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -x
 
-VERSION_APPLET="$(awk '$1 == "docker" && $2 == "run" { print $5; exit }' dnanexus/src/script.sh | awk -F: '{ print $2 }')"
+VERSION_APPLET="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
 dx mkdir -p $IMAGE/$VERSION_APPLET
 dx cd $IMAGE/$VERSION_APPLET
 
