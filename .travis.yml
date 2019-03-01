@@ -10,14 +10,14 @@ services:
 env:
   global:
     - ECR=002226384833.dkr.ecr.us-east-1.amazonaws.com
-    - IMAGE=methyldackel  # configurable, also need to be the same as the applet name defined in dxapp.json
+    - IMAGE=methyldackel  # configurable, must match the applet name defined in dxapp.json
 
 install:
   - pip install dxpy
 
 before_script:
   - dx login --token $DX_TOKEN --noprojects --save
-  - dx select $DX_PROJECT
+  - dx select $DX_PROJECT  # applet repository
 
 script:
   - echo "run test suite if there is any"
@@ -28,7 +28,12 @@ script:
 after_success:
   - docker images
 
-# Can't configure before/after/deploy sections per provider
+# There are 2 ways of triggering a deployment, on branch or on release tag.
+# Generally 'on release tag' would result in less deployments than 'on branch'.
+# For platfomrs that incur expensive charges for building/testing deployments,
+# or those that may have negative effects for having too many deployments,
+# 'on release tag' might be a more desirable options.
+# Plus you can't really configure before/after/deploy sections per provider.
 deploy:
   - provider: script
     script: bash scripts/deploy_docker.sh
