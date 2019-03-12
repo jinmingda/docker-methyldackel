@@ -1,0 +1,41 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: ECR Settings
+      Parameters:
+      - RepositoryName
+      - DaysToRetainUntaggedImages
+Parameters: 
+  RepositoryName:
+    Description: The name of the ECR repository.
+    Type: String
+    Default: methyldackel
+  DaysToRetainUntaggedImages:
+    Description: The number of days to retain untagged images.
+    Type: Number
+    Default: 7
+Resources:
+  Repository: 
+    Type: "AWS::ECR::Repository"
+    Properties: 
+      RepositoryName: !Ref RepositoryName
+      LifecyclePolicy:
+        LifecyclePolicyText: !Sub |
+          {
+            "rules": [
+              {
+                "rulePriority": 1,
+                "description": "Only keep untagged images for ${DaysToRetainUntaggedImages} days",
+                "selection": {
+                  "tagStatus": "untagged",
+                  "countType": "sinceImagePushed",
+                  "countUnit": "days",
+                  "countNumber": ${DaysToRetainUntaggedImages}
+                },
+                "action": { "type": "expire" }
+              }
+            ]
+          }

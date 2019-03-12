@@ -1,3 +1,10 @@
+# Set following Environment Variables in Travis (* sensitive information):
+# AWS_ACCESS_KEY_ID*:      IAM user that can push to ECR.
+# AWS_SECRET_ACCESS_KEY*:  See above.
+# DX_PROJECT:              ID of the dx project for official releases.
+# DX_SANDBOX:              ID of the dx project for testing sandbox.
+# DX_TOKEN*:               Token of the dx user that have Contribute access to
+#                          DX_PROJECT and DX_SANDBOX.
 sudo: required
 
 dist: xenial
@@ -6,6 +13,11 @@ language: python
 
 services:
   - docker
+
+branches:
+  only:
+  - master
+  - /^ci-.*$/
 
 env:
   global:
@@ -17,29 +29,29 @@ install:
 
 before_script:
   - dx login --token $DX_TOKEN --noprojects --save
-  - dx select $DX_PROJECT  # applet repository
+  - dx select $DX_SANDBOX
 
 script:
-  - echo "run test suite if there is any"
-  - docker build -t $IMAGE .
-  - docker run --rm $IMAGE
-  - dx build dnanexus/$IMAGE --overwrite --dry-run
+  - echo "run test suite if there is any"   # run local test suite
+  - docker build -t $IMAGE .                # build docker image
+  - docker run --rm $IMAGE                  # test docker image
+  - dx build dnanexus/$IMAGE --dry-run      # perform local checks
 
 after_success:
+  - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
+  - docker tag $IMAGE:latest $ECR/$IMAGE:$VERSION_CONTAINER
+  - docker tag $IMAGE:latest $ECR/$IMAGE:latest
   - docker images
 
-# There are 2 ways of triggering a deployment, on branch or on release tag.
-# Generally 'on release tag' would result in less deployments than 'on branch'.
-# For platfomrs that incur expensive charges for building/testing deployments,
-# or those that may have negative effects for having too many deployments,
-# 'on release tag' might be a more desirable options.
-# Plus you can't really configure before/after/deploy sections per provider.
 deploy:
+  - provider: script
+    script: bash scripts/deploy_dnanexus.sh
+    on:
+      branch: master
   - provider: script
     script: bash scripts/deploy_docker.sh
     on:
       tags: true
-      #branch: master
   - provider: script
     script: bash scripts/deploy_dnanexus.sh
     on:

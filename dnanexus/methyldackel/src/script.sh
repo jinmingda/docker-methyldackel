@@ -5,9 +5,6 @@ main() {
   # set -x to print trace
   set -e -x
 
-  # login to pull images from ECR
-  eval $(docker run --rm -e AWS_ACCESS_KEY_ID="$aws_access_key_id" -e AWS_SECRET_ACCESS_KEY="$aws_secret_access_key" mesosphere/aws-cli ecr get-login --no-include-email --region us-east-1)
-
   opts=""
 
   mkdir -p /data/
@@ -37,6 +34,14 @@ main() {
 
   if [ "$extra_options" != "" ]; then
     opts="$opts $extra_options"
+  fi
+
+  # login to pull images from ECR
+  eval $(docker run --rm -e AWS_ACCESS_KEY_ID="$aws_access_key_id" -e AWS_SECRET_ACCESS_KEY="$aws_secret_access_key" mesosphere/aws-cli ecr get-login --no-include-email --region us-east-1)
+
+  # for sandbox only, will skip in production
+  if [ -f ~/methyldackel.tar ]; then
+    docker load -i ~/methyldackel.tar
   fi
 
   docker run -v /data/:/tmp 002226384833.dkr.ecr.us-east-1.amazonaws.com/methyldackel:0.3.0 extract reference.fa ${bamfile_name} ${opts}
