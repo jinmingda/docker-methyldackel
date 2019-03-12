@@ -14,11 +14,6 @@ language: python
 services:
   - docker
 
-branches:
-  only:
-  - master
-  - /^ci-.*$/
-
 env:
   global:
     - ECR=002226384833.dkr.ecr.us-east-1.amazonaws.com
@@ -38,7 +33,7 @@ script:
   - dx build dnanexus/$IMAGE --dry-run      # perform local checks
 
 after_success:
-  - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
+  - export VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
   - docker tag $IMAGE:latest $ECR/$IMAGE:$VERSION_CONTAINER
   - docker tag $IMAGE:latest $ECR/$IMAGE:latest
   - docker images
