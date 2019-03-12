@@ -23,7 +23,7 @@ install:
   - pip install awscli dxpy
 
 before_script:
-  - VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
+  - export VERSION_CONTAINER="$(awk '$2 == "VERSION" { print $3; exit }' Dockerfile)"
   - eval $(aws ecr get-login --no-include-email --region us-east-1)
   - docker pull $ECR/$IMAGE:$VERSION_CONTAINER || true  # could fail if image isn't there
   - dx login --token $DX_TOKEN --noprojects --save
